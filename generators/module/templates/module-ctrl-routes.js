@@ -6,7 +6,7 @@
  * @type {exports}
  */
 var Joi = require('joi');
-var <%= controllerName %> = require('./<%= name %>-ctrl');
+var <%= serviceName %> = require('./<%= name %>-service');
 
 module.exports = function() {
   return [
@@ -15,7 +15,14 @@ module.exports = function() {
       path: '/<%= pluralName %>',
       config: {
         description: 'Creates a <%= name %>',
-        handler: <%= controllerName %>.create,
+        handler: function (req, reply) {
+					<%= serviceName %>.create(req.payload, function (err, data) {
+						if (err) {
+							return reply(Boom.wrap(err));
+						}
+						reply(data);
+					});
+				},
         validate: {
           payload: {
             // TODO: Add some validations
@@ -29,7 +36,14 @@ module.exports = function() {
       path: '/<%= pluralName %>',
       config : {
         description: 'Fetches all <%= pluralName %>',
-        handler: <%= controllerName %>.find
+        handler: function (req, reply) {
+					<%= serviceName %>.find(function (err, data) {
+						if (err) {
+							return reply(Boom.wrap(err));
+						}
+						reply(data);
+					});
+				}
       }
     },
 		
@@ -38,7 +52,14 @@ module.exports = function() {
       path: '/<%= pluralName %>/{id}',
       config : {
         description: 'Fetches a <%= name %> by id',
-        handler: <%= controllerName %>.findById,
+        handler: function (req, reply) {
+					<%= serviceName %>.findById(req.params.id, function (err, data) {
+						if (err) {
+							return reply(Boom.wrap(err));
+						}
+						reply(data);
+					});
+				},
         validate: {
           params: {
             id: Joi.number().integer().required()
@@ -52,7 +73,14 @@ module.exports = function() {
       path: '/<%= pluralName %>/{id}',
       config : {
         description: 'Updates a <%= name %> for a specific id',
-        handler: <%= controllerName %>.update,
+        handler: function (req, reply) {
+					<%= serviceName %>.update(req.params.id, req.payload, function (err, data) {
+						if (err) {
+							return reply(Boom.wrap(err));
+						}
+						reply(data);
+					});
+				},
         validate: {
           params: {
             id: Joi.number().integer().required()
@@ -69,7 +97,14 @@ module.exports = function() {
       path: '/<%= pluralName %>/{id}',
       config : {
         description: 'Remove a <%= name %> for a specific id',
-        handler: <%= controllerName %>.remove,
+        handler: function (req, reply) {
+					<%= serviceName %>.remove(req.params.id, function (err, data) {
+						if (err) {
+							return reply(Boom.wrap(err));
+						}
+						reply(data);
+					});
+				},
         validate: {
           params: {
             id: Joi.number().integer().required()
@@ -77,7 +112,7 @@ module.exports = function() {
         }
       }
     }
-		
+
 		/* Add new methods above */
   ]
 }();
