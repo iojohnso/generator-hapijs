@@ -20,9 +20,9 @@ This hapijs generator assumes that you want your project structure to look like 
 ```bash
 -project
 --module
----module-ctrl.js
+---module-service.js
 ---module-dao.js
----module-routes.js
+---module-ctrl-routes.js
 ---module-test.js
 ```
 

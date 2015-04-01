@@ -23,10 +23,10 @@ describe('module generator', function () {
 						var expected = [
 								// add files you expect to exist here.
 								'modules/items',
-								'modules/items/item-ctrl.js',
+								'modules/items/item-ctrl-routes.js',
+								'modules/items/item-service.js',
 								'modules/items/item-dao.js',
 								'modules/items/item-test.js',
-								'modules/items/item-routes.js'
 						];
 
 						helpers.mockPrompt(this.app, {
@@ -59,10 +59,10 @@ describe('module generator', function () {
 						var expected = [
 								// add files you expect to exist here.
 								'modules/items',
-								'modules/items/item-ctrl.js',
+								'modules/items/item-ctrl-routes.js',
+								'modules/items/item-service.js',
 								'modules/items/item-dao.js',
-								'modules/items/item-test.js',
-                'modules/items/item-routes.js'
+								'modules/items/item-test.js'
 						];
 
 						this.app.options['skip-install'] = true;

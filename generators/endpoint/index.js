@@ -43,7 +43,7 @@ var RouteGenerator = yeoman.generators.Base.extend({
 			{
 				type: 'input',
 				name: 'handler',
-				message: 'What would you like to name your method handler?'
+				message: 'What would you like to name your method handler? (Examples: upsert, findByKey, deleteByName)'
 			}
 		];
 
@@ -73,42 +73,50 @@ var RouteGenerator = yeoman.generators.Base.extend({
 
 	},
 
-	// Copy the code for the new endpoint to the dao, ctrl, and routes file
+	// Copy the code for the new endpoint to the ctrl, service, and dao files
 	files: function () {
 
 		var module = inflection.singularize(this.module);
 		var pluralModule = inflection.pluralize(this.module);
-		var daoName = inflection.camelize(module, true) + 'Dao';
-		var controllerName = inflection.camelize(module, true) + 'Controller';
+		this.controllerName = inflection.camelize( this.module, true ) + 'Controller';
+		this.serviceName = inflection.camelize( this.module, true ) + 'Service';
+		this.daoName = inflection.camelize( this.module, true ) + 'Dao';
 
 		// THE INDENTATION OF THIS VARIABLE IS IMPORTANT EVEN THOUGH IT LOOKS MESSY AS HELL
-		var routeToAdd = ",\n\
+		var ctrlToAdd = ",\n\
 		\n\
 		{\n\
 			method: '" + this.methodType + "',\n\
 			path: '" + this.route + "',\n\
 			config : {\n\
 				description: '" + this.description + "',\n\
-				handler: " + controllerName + "." + this.handler + "\n\
+				handler: function (req, reply) {\n\
+					" + this.serviceName + "." + this.handler + "(req.params.id, function (err, data) {\n\
+						if (err) {\n\
+							return reply(Boom.wrap(err));\n\
+						}\n\
+						reply(data);\n\
+					});\n\
+				}\n\
 			}\n\
 		}";
 
 		// THE INDENTATION OF THIS VARIABLE IS IMPORTANT EVEN THOUGH IT LOOKS MESSY AS HELL
-		var ctrlToAdd = "\
+		var serviceToAdd = "\
 /**\n\
  * " + this.description + "\n\
  *\n\
- * @param req\n\
- * @param reply\n\
+ * @param id\n\
+ * @param callback\n\
  */\n\
-exports." + this.handler + " = function (req, reply) {\n\
+exports." + this.handler + " = function (id, callback) {\n\
 \n\
-	" + daoName + "." + this.handler + "(req.params.id, function (err, data) {\n\
+	" + this.daoName + "." + this.handler + "(id, function (err, data) {\n\
 		if (err) {\n\
-			return reply(Boom.wrap(err));\n\
+			return callback(Boom.wrap(err));\n\
 		}\n\
 		\n\
-		reply(data);\n\
+		callback(null, data);\n\
 	});\n\
 };\n\
 ";
@@ -118,34 +126,35 @@ exports." + this.handler + " = function (req, reply) {\n\
 /**\n\
  * " + this.description + "\n\
  *\n\
+ * @param id\n\
  * @param callback\n\
  */\n\
-exports." + this.handler + " = function(callback) {\n\
+exports." + this.handler + " = function(id, callback) {\n\
 	// TODO: Implement dao method and call callback(null, <data>)\n\
 	return callback(Boom.notImplemented());\n\
 };\n\
 ";
 
 		// TODO: Refactor this into method and figure out how to get endpoint comma to start after last endpoint and not two lines past it
-		var routePath = path.resolve(process.cwd(), 'modules', pluralModule, module + "-routes.js");
-		var ctrlPath = path.resolve(process.cwd(), 'modules', pluralModule, module + "-ctrl.js");
+		var ctrlPath = path.resolve(process.cwd(), 'modules', pluralModule, module + "-ctrl-routes.js");
+		var servicePath = path.resolve(process.cwd(), 'modules', pluralModule, module + "-service.js");
 		var daoPath = path.resolve(process.cwd(), 'modules', pluralModule, module + "-dao.js");
-		var routeSrc = fs.readFileSync(routePath, 'utf8');
 		var ctrlSrc = fs.readFileSync(ctrlPath, 'utf8');
+		var serviceSrc = fs.readFileSync(servicePath, 'utf8');
 		var daoSrc = fs.readFileSync(daoPath, 'utf8');
-		var indexOfRoute = routeSrc.indexOf(MARKER);
 		var indexOfCtrl = ctrlSrc.indexOf(MARKER);
+		var indexOfService = serviceSrc.indexOf(MARKER);
 		var indexOfDao = daoSrc.indexOf(MARKER);
-		var lineStartRoute = routeSrc.substring(0, indexOfRoute).lastIndexOf('\n') + 1;
+		var lineStartService = serviceSrc.substring(0, indexOfService).lastIndexOf('\n') + 1;
 		var lineStartCtrl = ctrlSrc.substring(0, indexOfCtrl).lastIndexOf('\n') + 1;
 		var lineStartDao = daoSrc.substring(0, indexOfDao).lastIndexOf('\n') + 1;
-		var indentRoute = routeSrc.substring(lineStartRoute,indexOfRoute);
+		var indentService = serviceSrc.substring(lineStartService,indexOfService);
 		var indentCtrl = ctrlSrc.substring(lineStartCtrl,indexOfCtrl);
 		var indentDao = daoSrc.substring(lineStartDao,indexOfDao);
-		routeSrc = routeSrc.substring(0,indexOfRoute) + routeToAdd + "\n" + indentRoute + routeSrc.substring(indexOfRoute);
+		serviceSrc = serviceSrc.substring(0,indexOfService) + serviceToAdd + "\n" + indentService + serviceSrc.substring(indexOfService);
 		ctrlSrc = ctrlSrc.substring(0,indexOfCtrl) + ctrlToAdd + "\n" + indentCtrl + ctrlSrc.substring(indexOfCtrl);
 		daoSrc = daoSrc.substring(0,indexOfDao) + daoToAdd + "\n" + indentDao + daoSrc.substring(indexOfDao);
-		fs.writeFileSync(routePath,routeSrc);
+		fs.writeFileSync(servicePath,serviceSrc);
 		fs.writeFileSync(ctrlPath,ctrlSrc);
 		fs.writeFileSync(daoPath,daoSrc);
 

@@ -59,40 +59,47 @@ describe('endpoint generator', function () {
 			path: '/items',\n\
 			config : {\n\
 				description: 'This is my description',\n\
-				handler: itemController.findEm\n\
+				handler: function \\(req, reply\\) {\n\
+					itemService.findEm\\(req.params.id, function \\(err, data\\) {\n\
+						if \\(err\\) {\n\
+							return reply\\(Boom.wrap\\(err\\)\\);\n\
+						}\n\
+						reply\\(data\\);\n\
+					}\\);\n\
+				}\n\
 			}\n\
 		}";
 
 			this.app.run({}, function () {
-				helpers.assertFileContent(path.resolve(process.cwd(), 'modules', 'items', 'item-routes.js'), RegExp(expected));
+				helpers.assertFileContent(path.resolve(process.cwd(), 'modules', 'items', 'item-ctrl-routes.js'), RegExp(expected));
 				done();
 			});
 		});
 
 
-		it('adds the expected controller method', function (done) {
+		it('adds the expected service method', function (done) {
 
 var expected = "\n\
 /\\*\\*\n\
  \\* This is my description\n\
  \\*\n\
- \\* @param req\n\
- \\* @param reply\n\
+ \\* @param id\n\
+ \\* @param callback\n\
  \\*/\n\
-exports.findEm = function \\(req, reply\\) {\n\
+exports.findEm = function \\(id, callback\\) {\n\
 \n\
-	itemDao.findEm\\(req.params.id, function \\(err, data\\) {\n\
+	itemDao.findEm\\(id, function \\(err, data\\) {\n\
 		if \\(err\\) {\n\
-			return reply\\(Boom.wrap\\(err\\)\\);\n\
+			return callback\\(Boom.wrap\\(err\\)\\);\n\
 		}\n\
 		\n\
-		reply\\(data\\);\n\
+		callback\\(null, data\\);\n\
 	}\\);\n\
 };\n\
 ";
 
 			this.app.run({}, function () {
-				helpers.assertFileContent(path.resolve(process.cwd(), 'modules', 'items', 'item-ctrl.js'), RegExp(expected));
+				helpers.assertFileContent(path.resolve(process.cwd(), 'modules', 'items', 'item-service.js'), RegExp(expected));
 				done();
 			});
 		});
@@ -104,9 +111,10 @@ var expected = "\
 /\\*\\*\n\
  \\* This is my description\n\
  \\*\n\
+ \\* @param id\n\
  \\* @param callback\n\
  \\*/\n\
-exports.findEm = function\\(callback\\) {\n\
+exports.findEm = function\\(id, callback\\) {\n\
 	// TODO: Implement dao method and call callback\\(null, <data>\\)\n\
 	return callback\\(Boom.notImplemented\\(\\)\\);\n\
 };\n\
@@ -172,12 +180,19 @@ exports.findEm = function\\(callback\\) {\n\
 			path: '/items',\n\
 			config : {\n\
 				description: 'This is my description',\n\
-				handler: itemController.findEm\n\
+				handler: function \\(req, reply\\) {\n\
+					itemService.findEm\\(req.params.id, function \\(err, data\\) {\n\
+						if \\(err\\) {\n\
+							return reply\\(Boom.wrap\\(err\\)\\);\n\
+						}\n\
+						reply\\(data\\);\n\
+					}\\);\n\
+				}\n\
 			}\n\
 		}";
 
 			this.app.run({}, function () {
-				helpers.assertFileContent(path.resolve(process.cwd(), 'modules', 'items', 'item-routes.js'), RegExp(expected));
+				helpers.assertFileContent(path.resolve(process.cwd(), 'modules', 'items', 'item-ctrl-routes.js'), RegExp(expected));
 				done();
 			});
 		});

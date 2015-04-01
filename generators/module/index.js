@@ -44,8 +44,9 @@ var ModuleGenerator = yeoman.generators.Base.extend({
 		// Default preference of using plural names for somethings, and singular for others
 		this.name = inflection.singularize( this.name );
 		this.pluralName = inflection.pluralize( this.name );
-		this.daoName = inflection.camelize( this.name, true ) + 'Dao';
 		this.controllerName = inflection.camelize( this.name, true ) + 'Controller';
+		this.serviceName = inflection.camelize( this.name, true ) + 'Service';
+		this.daoName = inflection.camelize( this.name, true ) + 'Dao';
 
 		// Create the modules directory if it doesn't already exist
 		if (!fs.existsSync(modulesDir)) {
@@ -76,10 +77,10 @@ var ModuleGenerator = yeoman.generators.Base.extend({
 		// Copy the template files with the correct name
 		var newBaseFileName = path.join(newModuleDir, this.name);
 		this.mkdir('modules');
-		this.copy('module-ctrl.js', path.resolve(newBaseFileName + '-ctrl.js'));
+		this.copy('module-ctrl-routes.js', path.resolve(newBaseFileName + '-ctrl-routes.js'));
+		this.copy('module-service.js', path.resolve(newBaseFileName + '-service.js'));
 		this.copy('module-dao.js', path.resolve(newBaseFileName + '-dao.js'));
 		this.copy('module-test.js', path.resolve(newBaseFileName + '-test.js'));
-		this.copy('module-routes.js', path.resolve(newBaseFileName + '-routes.js'));
 	}
 });
 
